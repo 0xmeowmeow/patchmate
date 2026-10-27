@@ -79,3 +79,10 @@ def test_only_the_seeker_completes():
 def test_no_quest_without_shared_connection():
     with pytest.raises(ValueError):
         board().add_quest(Quest("q2", "Find startups", "c", "d", "fern"))
+
+
+def test_words_never_match_a_nickname():
+    gs = [Guest(w, w.title(), find_me_for="x") for w in ["moth", "lantern", "comet"]]
+    for _ in range(50):
+        for q in assign(gs, {g.id: "clue" for g in gs}):
+            assert q.word not in {"moth", "lantern", "comet"}

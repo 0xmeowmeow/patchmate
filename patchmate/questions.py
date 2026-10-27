@@ -21,7 +21,8 @@ not homework and not small talk;
 - never reveal anything about either guest: no names, jobs, demographics, or details \
 someone could use to identify them;
 - never mention or hint at the private notes. Use them only to be gentle;
-- stay away from politics, health and personal problems.
+- stay away from politics, health and personal problems;
+- are short: under 25 words, easy to read on a phone in a loud room.
 
 Each question must make sense to either guest reading it alone.
 Also write "why": one short sentence, for a human host, naming the hidden link \

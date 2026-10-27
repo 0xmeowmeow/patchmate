@@ -49,6 +49,8 @@ def assign(guests: list[Guest], clues: dict[str, str], per_seeker: int = 1) -> l
     connection type with. The least-sought targets are picked first.
     """
     sought = {t: 0 for t in clues}
+    taken = {g.nickname.lower() for g in guests}
+    words = [w for w in WORDS if w not in taken] or WORDS
     quests = []
     for seeker in guests:
         options = [t for t in clues if t != seeker.id
@@ -57,7 +59,7 @@ def assign(guests: list[Guest], clues: dict[str, str], per_seeker: int = 1) -> l
         for target in options[:per_seeker]:
             sought[target] += 1
             qid = hashlib.sha1(f"{seeker.id}->{target}".encode()).hexdigest()[:10]
-            quests.append(Quest(qid, clues[target], seeker.id, target, secrets.choice(WORDS)))
+            quests.append(Quest(qid, clues[target], seeker.id, target, secrets.choice(words)))
     return quests
 
 
