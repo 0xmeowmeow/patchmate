@@ -14,6 +14,8 @@ __pycache__/
 X
 [ "${1:-}" = "-n" ] && exit 0
 rsync -az deploy/passenger_wsgi.py "mm:$DEST/passenger_wsgi.py"
+rsync -az --chmod=F755 deploy/app.cgi "mm:$DEST/app.cgi"
+rsync -az --chmod=F644 deploy/htaccess "mm:$DEST/.htaccess"
 ssh mm "cd $DEST && mkdir -p public tmp data \
   && { [ -x venv/bin/python3 ] || python3 -m venv venv; } \
   && venv/bin/pip install -q -r app/requirements.txt && touch tmp/restart.txt"

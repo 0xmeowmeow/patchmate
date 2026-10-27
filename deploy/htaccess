@@ -1,0 +1,16 @@
+# patchmate.meow-meow.io: every request goes through app.cgi, so nothing else
+# in this folder (code, venv, guest data) can be fetched as a file.
+Options +ExecCGI -Indexes -MultiViews
+AddHandler cgi-script .cgi
+AcceptPathInfo On
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+  RewriteRule ^favicon\.(ico|gif)$ - [L]
+  RewriteRule ^app\.cgi(/.*)?$ - [L]
+  RewriteRule ^(.*)$ app.cgi/$1 [QSA,L]
+</IfModule>
