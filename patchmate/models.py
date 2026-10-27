@@ -37,6 +37,7 @@ class Guest:
     curious_about: str = ""
     excited_about: str = ""
     nervous_about: str = ""  # always AGENT-only, see visible_to()
+    find_me_for: str = ""    # offered by the guest to become a quest clue, e.g. "just back from Japan"
     open_to: set[Connection] = field(default_factory=lambda: {Connection.CONVERSATION})
     share_with_host: bool = False
     allow_recording: bool = False
@@ -48,6 +49,7 @@ class Guest:
                 "curious_about": self.curious_about,
                 "excited_about": self.excited_about,
                 "nervous_about": self.nervous_about,
+                "find_me_for": self.find_me_for,
             }
         if audience is Audience.HOST and self.share_with_host:
             return {"curious_about": self.curious_about, "excited_about": self.excited_about}
@@ -75,3 +77,19 @@ class Card:
     text: str
     pair: tuple[str, str]
     why: str = ""  # the hidden link between the two, used for host introductions
+
+
+@dataclass
+class Quest:
+    """Find the person behind a clue. The clue comes only from what they offered.
+
+    The seeker sees `clue`. The target is told someone may come looking and
+    holds `word`, which the seeker enters to complete the quest.
+    """
+
+    id: str
+    clue: str
+    seeker: str
+    target: str
+    word: str
+    done: bool = False

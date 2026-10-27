@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .models import Card, Guest, shared_connections
+from .models import Card, Guest, Quest, shared_connections
 
 
 @dataclass
@@ -12,6 +12,7 @@ class Board:
     guests: dict[str, Guest] = field(default_factory=dict)
     cards: dict[str, Card] = field(default_factory=dict)
     marks: dict[str, set[str]] = field(default_factory=dict)  # card id -> guest ids
+    quests: dict[str, Quest] = field(default_factory=dict)
 
     def add_guest(self, guest: Guest) -> None:
         self.guests[guest.id] = guest
@@ -43,3 +44,26 @@ class Board:
 
     def matches(self) -> list[Card]:
         return [self.cards[cid] for cid, who in self.marks.items() if who >= set(self.cards[cid].pair)]
+
+    def add_quest(self, quest: Quest) -> None:
+        seeker, target = self.guests[quest.seeker], self.guests[quest.target]
+        if quest.seeker == quest.target or not shared_connections(seeker, target):
+            raise ValueError(f"no quest from {quest.seeker} to {quest.target}")
+        self.quests[quest.id] = quest
+
+    def quests_for(self, guest_id: str) -> list[str]:
+        """Open clues a guest is searching for. Never says who the target is."""
+        return [q.clue for q in self.quests.values() if q.seeker == guest_id and not q.done]
+
+    def sought(self, guest_id: str) -> list[tuple[str, str]]:
+        """(clue, word) for each open quest looking for this guest, so they know what to expect."""
+        return [(q.clue, q.word) for q in self.quests.values() if q.target == guest_id and not q.done]
+
+    def complete(self, guest_id: str, quest_id: str, word: str) -> bool:
+        """The seeker enters the word their target gave them."""
+        quest = self.quests[quest_id]
+        if quest.seeker != guest_id:
+            raise ValueError("guests can only complete their own quests")
+        if word.strip().lower() == quest.word:
+            quest.done = True
+        return quest.done
