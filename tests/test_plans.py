@@ -34,9 +34,11 @@ def test_lifts_only_from_same_area_and_not_self():
 
 def test_nudge_offers_a_real_lift():
     llm = FakeLLM({"obstacle": "transport", "suggestion": "Ask Lantern for a lift",
-                   "message": "Anyone driving from Belconnen?", "ask": "b"})
+                   "message": "Anyone driving from Belconnen?", "ask": "b",
+                   "if_then": "When I leave work, I'll text Lantern"})
     n = nudge(llm, patch()[0], "can't afford a cab home", patch(), PLAN)
     assert (n.obstacle, n.ask) == ("transport", "b")
+    assert n.if_then == "When I leave work, I'll text Lantern"
     _, user = llm.calls[0]
     assert "Lantern (id b)" in user and "Owl" not in user
 

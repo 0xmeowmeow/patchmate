@@ -38,12 +38,15 @@ plan, the group). Never invent people, places or prices.
 - Low-effort options are good: come for 30 minutes, ask for a lift, swap to an \
 indoor spot, bring a friend.
 - If it fits, draft a short, casual message they could send to the group.
+- End with a simple if-then plan in their words, like "When I finish work on \
+Thursday, I'll head straight there." If-then plans help people follow through.
 - No advice about feelings, health or life. No guilt. Saying no is fine.
 - If they mention self-harm, crisis or being unsafe, set "support": true and \
 write nothing else.
 
 Reply as JSON: {"obstacle": "...", "suggestion": "...", "message": "... or empty", \
-"ask": "id of the person to ask, or empty", "support": false}"""
+"ask": "id of the person to ask, or empty", "if_then": "When ..., I'll ...", \
+"support": false}"""
 
 SUPPORT = ("That sounds like more than a missed meetup. Patchmate can't help with "
            "that, but Lifeline can, any time: call 13 11 14 or text 0477 13 11 14.")
@@ -63,6 +66,7 @@ class Nudge:
     suggestion: str
     message: str = ""
     ask: str = ""  # guest id to ask, only ever someone from the lift list
+    if_then: str = ""  # "When X, I'll Y": implementation intentions aid follow-through
 
 
 def suggest_plans(llm: LLM, members: list[Guest], n: int = 3) -> list[Plan]:
@@ -106,4 +110,5 @@ def nudge(llm: LLM, who: Guest, objection: str, members: list[Guest], plan: Plan
         (reply.get("suggestion") or "").strip(),
         (reply.get("message") or "").strip(),
         ask if ask in {m.id for m in lifts} else "",
+        (reply.get("if_then") or "").strip(),
     )
