@@ -11,6 +11,7 @@ if sys.executable != INTERP:
 
 sys.path.insert(0, os.path.join(HOME, "app"))
 os.environ.setdefault("PATCHMATE_DATA", os.path.join(HOME, "data"))
+os.environ.setdefault("PATCHMATE_ENV", os.path.expanduser("~/.config/patchmate/env"))
 os.environ["SCRIPT_NAME"] = ""  # URLs are /tap, not /app.cgi/tap
 
 from wsgiref.handlers import CGIHandler  # noqa: E402

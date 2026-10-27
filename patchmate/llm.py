@@ -12,8 +12,13 @@ BASE_URL = "https://api.meta.ai/v1"
 SPARK = "muse-spark-1.3"
 
 
-def load_env(path: Path = Path(__file__).resolve().parent.parent / ".env") -> None:
-    """Read KEY=value lines from the repo's .env (git-ignored) without overriding the shell."""
+def load_env(path: Path | None = None) -> None:
+    """Read KEY=value lines from a git-ignored env file without overriding the shell.
+
+    Locally that's the repo's .env; on the server PATCHMATE_ENV points outside the web folder.
+    """
+    path = path or Path(os.environ.get("PATCHMATE_ENV")
+                        or Path(__file__).resolve().parent.parent / ".env")
     if not path.exists():
         return
     for line in path.read_text().splitlines():
