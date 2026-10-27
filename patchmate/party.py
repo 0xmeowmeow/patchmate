@@ -3,16 +3,17 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from .llm import LLM
 from .models import Guest, shared_connections
-from .questions import questions_for_many
+from .questions import questions_for_pair
 from .quests import next_target, pick_word, write_clue
-from .store import Store
+from .store import Store, to_guest
 
 log = logging.getLogger(__name__)
 
-PARTNERS_PER_CALL = 4  # how many people one knitting call pairs a guest with
+PARTNERS = 3  # new people to pair with per knit; each is its own call, run in parallel
 
 
 def knit(store: Store, llm: LLM, event: str, gid: str) -> int:
@@ -31,23 +32,37 @@ def knit(store: Store, llm: LLM, event: str, gid: str) -> int:
     others.sort(key=lambda g: counts.get(g.id, 0))
     if not others:
         return 0
-    try:
-        cards = questions_for_many(llm, me, others[:PARTNERS_PER_CALL])
-    except Exception:  # the party carries on without new cards
-        log.exception("knitting failed")
-        return 0
+    with ThreadPoolExecutor(max_workers=PARTNERS) as pool:  # model calls only; sqlite stays here
+        batches = list(pool.map(lambda o: _safe_pair(llm, me, o), others[:PARTNERS]))
+    cards = [c for batch in batches for c in batch]
     store.add_cards(event, cards)
     return len(cards)
 
 
-def add_clue(store: Store, llm: LLM, guest: Guest) -> None:
+def _safe_pair(llm: LLM, a: Guest, b: Guest) -> list:
     try:
-        clue = write_clue(llm, guest)
+        return questions_for_pair(llm, a, b, n=2)
+    except Exception:  # the party carries on without these cards
+        log.exception("knitting failed")
+        return []
+
+
+def welcome(store: Store, llm: LLM, event: str, gid: str) -> None:
+    """A new guest's clue and first cards, written at the same time so joining is quick."""
+    guest = to_guest(store.row(gid))
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        clue = pool.submit(_safe_clue, llm, guest)  # the model call only; sqlite stays on this thread
+        knit(store, llm, event, gid)
+        if text := clue.result():
+            store.set_clue(gid, text)
+
+
+def _safe_clue(llm: LLM, guest: Guest) -> str | None:
+    try:
+        return write_clue(llm, guest)
     except Exception:
         log.exception("clue failed")
-        return
-    if clue:
-        store.set_clue(guest.id, clue)
+        return None
 
 
 def ensure_quest(store: Store, event: str, gid: str) -> None:

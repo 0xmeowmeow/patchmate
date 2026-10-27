@@ -12,9 +12,9 @@ from flask import (Flask, abort, g, jsonify, redirect, render_template, request,
                    url_for)
 
 from .models import Connection
-from .party import add_clue, ensure_quest, knit
+from .party import ensure_quest, knit, welcome
 from .patches import Feeling
-from .store import Store, to_guest
+from .store import Store
 
 DATA = Path(os.environ.get("PATCHMATE_DATA", Path(__file__).resolve().parent.parent / "data"))
 
@@ -115,8 +115,7 @@ def create_app(llm_factory=None) -> Flask:
             int(expect) if expect.isdigit() else None,
             **{k: f.get(k, "") for k in ("nickname", "spot_me", "curious_about",
                                          "excited_about", "find_me_for", "nervous_about")})
-        add_clue(store(), llm(), to_guest(store().row(gid)))
-        knit(store(), llm(), code, gid)
+        welcome(store(), llm(), code, gid)
         resp = redirect(url_for("me_page", code=code))
         resp.set_cookie(f"pm_{code}", token, max_age=60 * 60 * 24 * 30, httponly=True,
                         samesite="Lax", secure=request.is_secure)

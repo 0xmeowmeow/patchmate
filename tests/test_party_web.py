@@ -14,9 +14,7 @@ class Model:
     def json(self, system, user):
         if "quest clue" in system:
             return {"ok": True, "clue": "Find someone who " + user.split(": ", 1)[1]}
-        labels = re.findall(r"Guest (P\d+)", user)
-        return {"pairs": [{"other": p, "questions": [{"text": f"Question {p}?", "why": "link"}]}
-                          for p in labels]}
+        return {"questions": [{"text": f"Question {hash(user) % 10**6}?", "why": "link"}]}
 
 
 @pytest.fixture

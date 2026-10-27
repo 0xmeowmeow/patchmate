@@ -66,26 +66,3 @@ def questions_for_all(llm: LLM, guests: list[Guest], n: int = 3) -> list[Card]:
         cards.extend(questions_for_pair(llm, a, b, n))
     return cards
 
-
-def questions_for_many(llm: LLM, new: Guest, others: list[Guest], n: int = 2) -> list[Card]:
-    """One call: questions pairing a new arrival with each of several guests already here."""
-    others = [o for o in others if o.id != new.id and shared_connections(new, o)]
-    if not others:
-        return []
-    labels = {f"P{i}": o for i, o in enumerate(others, 1)}
-    people = "\n\n".join(_describe(label, o) for label, o in labels.items())
-    user = (f"{_describe('A', new)}\n\nOthers already here:\n\n{people}\n\n"
-            f"For each other guest, write {n} questions for A and that guest.\n"
-            'Reply as JSON: {"pairs": [{"other": "P1", "questions": [{"text": "...", "why": "..."}]}]}')
-    reply = llm.json(SYSTEM, user)
-    cards = []
-    for entry in reply.get("pairs", []):
-        other = labels.get(str(entry.get("other", "")).strip())
-        if not other:
-            continue
-        for q in entry.get("questions", [])[:n]:
-            text = (q.get("text") or "").strip()
-            if text:
-                pair = (new.id, other.id)
-                cards.append(Card(_card_id(pair, text), text, pair, (q.get("why") or "").strip()))
-    return cards

@@ -44,18 +44,3 @@ def test_all_pairs():
 def test_parse_json_tolerates_fences():
     assert parse_json('```json\n{"x": 1}\n```') == {"x": 1}
 
-
-def test_questions_for_many_maps_labels_back_and_skips_incompatible():
-    from patchmate.questions import questions_for_many
-    a, b = pair()
-    c = Guest("c", "Owl", curious_about="tides")
-    d = Guest("d", "Fox", open_to={Connection.PROFESSIONAL})
-    llm = FakeLLM({"pairs": [
-        {"other": "P1", "questions": [{"text": "q-b", "why": "w"}]},
-        {"other": "P2", "questions": [{"text": "q-c", "why": ""}, {"text": ""}]},
-        {"other": "P9", "questions": [{"text": "ghost"}]},
-    ]})
-    cards = questions_for_many(llm, a, [b, c, d])
-    assert [(c.text, c.pair) for c in cards] == [("q-b", ("a", "b")), ("q-c", ("a", "c"))]
-    _, user = llm.calls[0]
-    assert "Fox" not in user and "Owl" not in user and "P3" not in user
