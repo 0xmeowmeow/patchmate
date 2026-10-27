@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ ev.name }} · Patchmate{% endblock %}
+{% block body %}
+{% if via == "tap" %}<p class="card hi">You just tapped a hand. Welcome in.</p>{% endif %}
+<p class="tag">{{ ev.name }}</p>
+<h1>Meet people through questions, not profiles.</h1>
+<p>Tell me a little about yourself. I'll write questions that only you and someone else here
+   could answer together. You pick the ones you like; if they pick the same one, I'll introduce you.
+   Nobody sees your answers.</p>
+
+<form method="post" action="{{ url_for('join', code=ev.code) }}" id="join">
+  <label>What should people call you tonight?
+    <input type="text" name="nickname" maxlength="40" required autocomplete="off" placeholder="A nickname is fine"></label>
+
+  <label>How would someone spot you?<small>Only shown to people you match with.</small>
+    <input type="text" name="spot_me" maxlength="120" placeholder="e.g. the moth costume, green scarf"></label>
+
+  <label>What have you been curious about lately?
+    <textarea name="curious_about" maxlength="300" placeholder="Anything: why cats purr, how bridges are built…"></textarea></label>
+
+  <label>What are you excited about at the moment?
+    <textarea name="excited_about" maxlength="300" placeholder="A project, a trip, a new hobby…"></textarea></label>
+
+  <label>Something you'd love someone to ask you about tonight?
+    <small>This can become a quest: "find someone who…". Leave it blank to skip.</small>
+    <input type="text" name="find_me_for" maxlength="120" placeholder="e.g. just got back from Japan"></label>
+
+  <fieldset class="card private">
+    <label style="margin-top:0">Anything that makes tonight a bit nerve-racking? <small>Optional. Only the AI
+      reads this, to be gentle with you. It is never shown to anyone, including the host.</small>
+      <input type="text" name="nervous_about" maxlength="200" placeholder="e.g. I only know the host"></label>
+  </fieldset>
+
+  <label>What are you open to?<small>Never shown to anyone. It only stops mismatched questions.</small></label>
+  {% for value, label in connections %}
+  <label class="check"><input type="checkbox" name="open_to" value="{{ value.value }}"
+    {% if value.value == 'conversation' %}checked{% endif %}> {{ label }}</label>
+  {% endfor %}
+
+  <label>How many good conversations do you expect to have tonight?</label>
+  <div class="seg" role="radiogroup">
+    {% for n in range(6) %}<label><input type="radio" name="expect" value="{{ n }}"><span>{{ n }}{% if n == 5 %}+{% endif %}</span></label>{% endfor %}
+  </div>
+
+  <label class="check" style="margin-top:1.4rem"><input type="checkbox" name="share_with_host" value="1">
+    The host may see what I'm curious and excited about, to introduce me in person.</label>
+  <label class="check"><input type="checkbox" name="consent" value="1" required>
+    I'm 18+, and I'm happy for Patchmate to keep these answers for this event.
+    I can delete them any time from my page. No account, no email, no recording.</label>
+
+  <p style="margin-top:1.4rem"><button type="submit">Knit my questions</button></p>
+  <p class="soft">Writing your questions takes a few seconds.</p>
+</form>
+<script>
+document.getElementById('join').addEventListener('submit', e => {
+  const b = e.target.querySelector('button'); b.disabled = true; b.textContent = 'Knitting…';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Host · {{ ev.name }}{% endblock %}
+{% block body %}
+<meta http-equiv="refresh" content="45">
+<p class="tag">Host view · {{ ev.name }}</p>
+<h1>The room</h1>
+<div class="stats">
+  <div class="card"><b>{{ guests|length }}</b>joined</div>
+  <div class="card"><b>{{ matches|length }}</b>matches</div>
+  <div class="card"><b>{{ done|length }}</b>quests found</div>
+  <div class="card"><b>{{ '%.1f'|format(expect) if expect is not none else '–' }}</b>expected</div>
+  <div class="card"><b>{{ '%.1f'|format(had) if had is not none else '–' }}</b>had ({{ n_had }})</div>
+</div>
+
+<h2>Might need an introduction</h2>
+{% for r in rescue %}
+<div class="card">
+  <p><b>{{ r.name }}</b> <span class="soft">· here {{ r.minutes }} min, no connections yet</span></p>
+  {% if r.other %}<p>Introduce them to <b>{{ r.other }}</b>. {{ r.why }}</p>{% endif %}
+</div>
+{% else %}
+<p class="soft">Nobody yet. Everyone here 20+ minutes has connected with someone.</p>
+{% endfor %}
+
+<h2>Recent matches</h2>
+{% for m in matches|reverse %}
+<div class="card"><p><b>{{ names[m.a] }}</b> + <b>{{ names[m.b] }}</b></p><p class="soft">{{ m.why }}</p></div>
+{% else %}<p class="soft">None yet.</p>{% endfor %}
+
+{% if shared %}
+<h2>Guests happy to be introduced</h2>
+{% for r in shared %}
+<div class="card"><p><b>{{ r.nickname }}</b></p>
+  <p class="soft">Curious: {{ r.curious_about or '–' }} · Excited: {{ r.excited_about or '–' }}</p></div>
+{% endfor %}
+{% endif %}
+
+<h2>Invite people</h2>
+<p><img src="{{ url_for('qr', code=ev.code) }}" alt="QR code to join" width="240" height="240"
+        style="background:#fff;border-radius:12px"></p>
+<p class="soft">{{ join_url }}</p>
+{% endblock %}

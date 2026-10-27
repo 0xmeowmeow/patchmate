@@ -86,3 +86,11 @@ def test_words_never_match_a_nickname():
     for _ in range(50):
         for q in assign(gs, {g.id: "clue" for g in gs}):
             assert q.word not in {"moth", "lantern", "comet"}
+
+
+def test_next_target_is_least_sought_and_compatible():
+    from patchmate.quests import next_target
+    gs = guests()
+    clues = {"a": "Japan", "b": "bees", "d": "startups"}
+    assert next_target(gs[2], gs, clues, {"a": 2, "b": 0}) == "b"
+    assert next_target(gs[2], gs, clues, {}, avoid={"a", "b"}) is None

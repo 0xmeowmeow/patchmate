@@ -63,6 +63,19 @@ def assign(guests: list[Guest], clues: dict[str, str], per_seeker: int = 1) -> l
     return quests
 
 
+def next_target(seeker: Guest, guests: list[Guest], clues: dict[str, str],
+                sought: dict[str, int], avoid: set[str] = frozenset()) -> str | None:
+    """The least-sought guest with a clue this seeker could look for, or None."""
+    options = [g.id for g in guests if g.id in clues and g.id != seeker.id
+               and g.id not in avoid and shared_connections(seeker, g)]
+    return min(options, key=lambda t: sought.get(t, 0), default=None)
+
+
+def pick_word(guests: list[Guest]) -> str:
+    taken = {g.nickname.lower() for g in guests}
+    return secrets.choice([w for w in WORDS if w not in taken] or WORDS)
+
+
 def quests_for_all(llm: LLM, guests: list[Guest], per_seeker: int = 1) -> list[Quest]:
     clues = {g.id: c for g in guests if (c := write_clue(llm, g))}
     return assign(guests, clues, per_seeker)

@@ -38,6 +38,7 @@ class Guest:
     excited_about: str = ""
     nervous_about: str = ""  # always AGENT-only, see visible_to()
     find_me_for: str = ""    # offered by the guest to become a quest clue, e.g. "just back from Japan"
+    spot_me: str = ""        # how to find them tonight (costume!); shown only after a mutual match
     has_done: str = ""       # things they've already done lots of, so plans can be new to everyone
     open_to: set[Connection] = field(default_factory=lambda: {Connection.CONVERSATION})
     area: str = ""           # rough area for logistics, e.g. "Belconnen"; never an address

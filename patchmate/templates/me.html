@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ me.nickname }} · Patchmate{% endblock %}
+{% block body %}
+<p class="tag">{{ ev.name }}</p>
+<h1>Hi {{ me.nickname }}.</h1>
+
+{% if flash == 'found' %}<p class="card hi">Found! Nice one. There's a new quest below when one's ready.</p>{% endif %}
+{% if flash == 'wrong' %}<p class="card">That's not the word. Maybe it's someone else? Keep asking.</p>{% endif %}
+
+{% for m in matches %}
+<div class="card hi">
+  <p><b>It's a match.</b> You and <b>{{ m.nickname }}</b> both want to talk about:</p>
+  <p>“{{ m.text }}”</p>
+  {% if m.spot_me %}<p class="soft">How to spot {{ m.nickname }}: {{ m.spot_me }}</p>{% endif %}
+</div>
+{% endfor %}
+
+{% for s in sought %}
+<div class="card">
+  <p><b>Someone may come looking for you:</b> “{{ s.clue }}”</p>
+  <p>If they find you, give them the word <span class="word">{{ s.word }}</span></p>
+</div>
+{% endfor %}
+
+<h2 id="quest">Your quest{% if found %} <span class="soft">· {{ found }} found</span>{% endif %}</h2>
+{% if quest %}
+<div class="card">
+  <p><b>{{ quest.clue }}</b></p>
+  <p class="soft">Ask around. When you find them, they'll give you a word.</p>
+  <form method="post" action="{{ url_for('quest', code=ev.code) }}" class="row">
+    <input type="text" name="word" placeholder="Their word" autocomplete="off" autocapitalize="off" style="flex:1">
+    <button>Found them</button>
+  </form>
+</div>
+{% else %}
+<p class="soft">No quest yet. One appears when someone offers something to be found for.</p>
+{% endif %}
+
+<h2 id="deck">Questions for you</h2>
+<p class="soft">Each one was written for you and one other person here. Tap the ones you'd love to talk
+  about. If they tap the same one, you're both told. Nobody sees what you don't pick.</p>
+{% if flash == 'nomore' %}<p class="card">No one new to pair you with yet. Try again as more people arrive.</p>{% endif %}
+{% for c in deck %}
+<form method="post" action="{{ url_for('mark', code=ev.code, card=c.id) }}" class="card q{% if c.marked %} on{% endif %}" id="c-{{ c.id }}">
+  <p>{{ c.text }}</p>
+  <button class="{% if not c.marked %}quiet{% endif %}">{% if c.marked %}Picked ✓{% else %}I'd talk about this{% endif %}</button>
+</form>
+{% else %}
+<p class="card">You're early! Questions appear as other people arrive.</p>
+{% endfor %}
+<form method="post" action="{{ url_for('more', code=ev.code) }}" id="more">
+  <button class="quiet">Knit more questions</button>
+</form>
+
+<footer>
+  <p><a class="btn" href="{{ url_for('again', code=ev.code) }}">Heading home? See them again</a></p>
+  <form method="post" action="{{ url_for('forget', code=ev.code) }}" onsubmit="return confirm('Delete everything you told Patchmate?')">
+    <button class="quiet">Delete my answers</button>
+  </form>
+</footer>
+<script>
+document.getElementById('more').addEventListener('submit', e => {
+  const b = e.target.querySelector('button'); b.disabled = true; b.textContent = 'Knitting…';
+});
+// Reload when something new happens (a match, a new card), unless they're typing.
+let last = null;
+async function poll() {
+  if (document.hidden) return;
+  try {
+    const r = await fetch('{{ url_for("state", code=ev.code) }}', {cache: 'no-store'});
+    const now = JSON.stringify(await r.json());
+    const typing = document.activeElement && document.activeElement.tagName === 'INPUT';
+    if (last && now !== last && !typing) location.reload();
+    last = now;
+  } catch (e) {}
+}
+poll(); setInterval(poll, 30000);
+</script>
+{% endblock %}

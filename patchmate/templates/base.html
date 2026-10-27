@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Patchmate{% endblock %}</title>
+<style>
+  :root { --bg:#15120f; --card:#211c17; --line:#3a3128; --ink:#f3ece2; --soft:#ab9f8f;
+          --accent:#ee8a4f; --accent-ink:#1a0f08; --ok:#8fd19e; --warn:#f0c26a; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#faf6ef; --card:#ffffff; --line:#e6dccd; --ink:#1d1916; --soft:#6b6157;
+            --accent:#c4552d; --accent-ink:#ffffff; --ok:#2f7d45; --warn:#9a6a10; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 system-ui,-apple-system,sans-serif; }
+  main { max-width:36rem; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:2rem; line-height:1.15; margin:.2rem 0 .4rem; letter-spacing:-.02em; }
+  h2 { font-size:1.15rem; margin:2rem 0 .6rem; }
+  p { margin:.4rem 0 .8rem; }
+  .soft { color:var(--soft); font-size:.95rem; }
+  .tag { color:var(--accent); font-weight:600; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:10px 0; }
+  .hi { border-color:var(--accent); }
+  label { display:block; font-weight:600; margin:1.1rem 0 .3rem; }
+  label small { font-weight:400; color:var(--soft); display:block; }
+  input[type=text], textarea, select { width:100%; font:inherit; color:var(--ink); background:var(--card);
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  textarea { min-height:3.2rem; resize:vertical; }
+  .check { display:flex; gap:.6rem; align-items:flex-start; font-weight:400; margin:.45rem 0; }
+  .check input { margin-top:.3rem; width:1.1rem; height:1.1rem; accent-color:var(--accent); }
+  button, .btn { display:inline-block; font:inherit; font-weight:600; border:0; border-radius:999px;
+    padding:12px 20px; background:var(--accent); color:var(--accent-ink); cursor:pointer; text-decoration:none; }
+  button.quiet, .btn.quiet { background:transparent; color:var(--ink); border:1px solid var(--line); }
+  button:disabled { opacity:.6; }
+  .q { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .q p { margin:0; }
+  .q button { flex:none; padding:8px 14px; font-size:.9rem; }
+  .q.on { border-color:var(--accent); }
+  .word { font-size:1.6rem; font-weight:700; color:var(--accent); letter-spacing:.04em; }
+  .private { border-style:dashed; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; margin-top:.4rem; }
+  .seg label { margin:0; font-weight:500; }
+  .seg input { position:absolute; opacity:0; }
+  .seg span { display:inline-block; padding:6px 12px; border:1px solid var(--line); border-radius:999px; }
+  .seg input:checked + span { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .seg input:focus-visible + span { outline:2px solid var(--accent); outline-offset:2px; }
+  a { color:var(--accent); }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(7rem,1fr)); gap:8px; }
+  .stats .card { margin:0; text-align:center; }
+  .stats b { display:block; font-size:1.8rem; }
+  footer { margin-top:3rem; }
+</style>
+</head>
+<body><main>{% block body %}{% endblock %}</main></body>
+</html>
